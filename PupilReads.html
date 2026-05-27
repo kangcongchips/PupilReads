@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PupilReads</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --ink: #1A1A2E;
+    --rust: #C0392B;
+    --gold: #D4A017;
+    --sage: #4A7C59;
+    --mist: #E8EDF2;
+    --paper: #FDFAF4;
+    --shadow: rgba(26,26,46,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display:none; min-height:100vh; }
+  .screen.active { display:flex; }
+
+  /* ── AUTH SCREEN ── */
+  #screen-auth { flex-direction: row; }
+  .auth-panel-left {
+    width: 45%;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-panel-left::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,57,43,0.3), transparent 70%);
+    top: -100px; left: -100px;
+  }
+  .auth-panel-left::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,0.2), transparent 70%);
+    bottom: -80px; right: -80px;
+  }
+  .brand-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 12px;
+    position: relative; z-index:1;
+  }
+  .brand-logo span { color: var(--gold); }
+  .brand-tagline {
+    font-size: 14px;
+    color: rgba(245,240,232,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    position: relative; z-index:1;
+    margin-bottom: 50px;
+  }
+  .brand-feature {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    position: relative; z-index:1;
+  }
+  .brand-feature-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(245,240,232,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .brand-feature-text { font-size: 13px; color: rgba(245,240,232,0.7); line-height:1.5; }
+  .brand-feature-text strong { color: var(--cream); display:block; font-size:14px; }
+
+  .auth-panel-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: var(--paper);
+    overflow-y: auto;
+  }
+  .auth-card { width: 100%; max-width: 420px; }
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 36px;
+    border-bottom: 2px solid rgba(26,26,46,0.1);
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: rgba(26,26,46,0.4);
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .auth-tab.active { color: var(--ink); }
+  .auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0; height: 2px;
+    background: var(--rust);
+  }
+  .auth-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; margin-bottom: 6px; }
+  .auth-subtitle { font-size: 13px; color: rgba(26,26,46,0.5); margin-bottom: 28px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(26,26,46,0.5);
+    margin-bottom: 7px;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(26,26,46,0.12);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--rust);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
+  }
+  .form-input.invalid { border-color: var(--rust); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field-error { font-size: 11px; color: var(--rust); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.15s, background 0.2s;
+    margin-top: 6px;
+  }
+  .btn-primary:hover { background: #2d2d4a; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .error-msg { font-size: 12px; color: var(--rust); margin-top: 8px; display: none; }
+  .error-msg.show { display: block; }
+
+  /* ── APP LAYOUT ── */
+  #screen-app { flex-direction: column; }
+  .app-nav {
+    background: var(--ink);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 60px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px var(--shadow);
+  }
+  .nav-brand { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--cream); margin-right: 36px; }
+  .nav-brand span { color: var(--gold); }
+  .nav-links { display:flex; gap:4px; flex:1; }
+  .nav-link {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(245,240,232,0.55);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+  }
+  .nav-link:hover { color: var(--cream); background: rgba(255,255,255,0.07); }
+  .nav-link.active { color: var(--cream); background: rgba(255,255,255,0.12); }
+  .nav-badge {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: var(--rust);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-user { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .nav-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--rust);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .nav-username { font-size: 13px; color: rgba(245,240,232,0.7); }
+  .nav-role-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(212,160,23,0.2);
+    color: var(--gold);
+    letter-spacing: 0.06em;
+  }
+  .btn-logout {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: 1px solid rgba(245,240,232,0.2);
+    background: none;
+    color: rgba(245,240,232,0.6);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--cream); }
+
+  .app-content { flex:1; padding: 36px 32px; max-width: 1100px; margin: 0 auto; width:100%; }
+
+  /* ── TABS ── */
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── DASHBOARD ── */
+  .page-heading { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: rgba(26,26,46,0.5); margin-bottom: 32px; }
+  .stats-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 36px; }
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 2px 12px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 0 16px 0 80px;
+    opacity: 0.08;
+  }
+  .stat-card:nth-child(1)::before { background: var(--rust); }
+  .stat-card:nth-child(2)::before { background: var(--sage); }
+  .stat-card:nth-child(3)::before { background: var(--gold); }
+  .stat-card:nth-child(4)::before { background: #7B5EA7; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(26,26,46,0.4); margin-bottom: 10px; }
+  .stat-value { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 700; line-height:1; }
+  .stat-desc { font-size: 12px; color: rgba(26,26,46,0.45); margin-top: 6px; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 20px; margin-bottom: 16px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+  /* ── READING MATERIALS ── */
+  .materials-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 18px; }
+  .material-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 2px 12px var(--shadow);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .material-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--shadow); }
+  .material-card-footer { margin-top: auto; padding-top: 16px; display: flex; gap: 8px; align-items: center; }
+  .difficulty-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .diff-beginner { background: rgba(74,124,89,0.12); color: var(--sage); }
+  .diff-intermediate { background: rgba(212,160,23,0.15); color: #b8890e; }
+  .diff-advanced { background: rgba(192,57,43,0.12); color: var(--rust); }
+  .material-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+  .material-preview { font-size: 13px; color: rgba(26,26,46,0.5); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .btn-read {
+    padding: 9px 20px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+  }
+  .btn-read:hover { background: var(--rust); }
+  .btn-bookmark {
+    padding: 9px 12px;
+    background: rgba(26,26,46,0.06);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-bookmark:hover { background: rgba(212,160,23,0.15); transform: scale(1.1); }
+  .btn-bookmark.bookmarked { background: rgba(212,160,23,0.2); }
+
+  /* ── READING SESSION ── */
+  #screen-reading { flex-direction: column; background: var(--paper); }
+  .reading-header {
+    background: var(--ink);
+    padding: 18px 40px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .btn-back {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.1);
+    color: var(--cream);
+    border: none; border-radius: 8px;
+    font-size: 13px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.18); }
+  .reading-title-bar { font-family: 'Fraunces', serif; font-size: 20px; color: var(--cream); flex:1; }
+
+  .reading-body { flex: 1; display: flex; gap: 0; overflow: hidden; }
+  .reading-text-pane { flex: 1; padding: 48px 60px; overflow-y: auto; }
+  .reading-text-pane h2 { font-family: 'Fraunces', serif; font-size: 28px; margin-bottom: 28px; color: var(--ink); }
+  .reading-text { font-size: 18px; line-height: 1.85; color: var(--ink); max-width: 640px; }
+  .reading-text p { margin-bottom: 20px; }
+
+  .reading-controls-pane {
+    width: 320px;
+    background: white;
+    border-left: 1px solid rgba(26,26,46,0.08);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+  .pane-title { font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 4px; color: var(--ink); }
+  .pane-hint { font-size: 12px; color: rgba(26,26,46,0.45); line-height: 1.5; }
+  .recording-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .recording-btn.start { background: var(--sage); color: white; }
+  .recording-btn.stop { background: var(--rust); color: white; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(192,57,43,0.4); } 50%{ box-shadow: 0 0 0 10px rgba(192,57,43,0); } }
+  .recording-timer { text-align: center; font-family: 'Fraunces', serif; font-size: 36px; color: var(--rust); display: none; }
+  .simulate-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px dashed rgba(26,26,46,0.2);
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(26,26,46,0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .simulate-btn:hover { border-color: var(--rust); color: var(--rust); background: rgba(192,57,43,0.04); }
+  .divider { height:1px; background: rgba(26,26,46,0.08); }
+
+  /* ── FEEDBACK DISPLAY ── */
+  .feedback-section { display: none; }
+  .feedback-section.visible { display: block; }
+  .score-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .score-box { flex:1; padding: 14px; border-radius: 12px; text-align: center; }
+  .score-box.pronunciation { background: rgba(74,124,89,0.1); }
+  .score-box.fluency { background: rgba(212,160,23,0.12); }
+  .score-box-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(26,26,46,0.45); margin-bottom: 6px; }
+  .score-box-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; }
+  .score-box.pronunciation .score-box-value { color: var(--sage); }
+  .score-box.fluency .score-box-value { color: #b8890e; }
+  .score-bar-wrap { margin-bottom: 14px; }
+  .score-bar-label { font-size: 12px; color: rgba(26,26,46,0.5); margin-bottom: 5px; display:flex; justify-content:space-between; }
+  .score-bar-track { height: 6px; background: rgba(26,26,46,0.08); border-radius: 10px; overflow:hidden; }
+  .score-bar-fill { height:100%; border-radius: 10px; transition: width 1s cubic-bezier(.4,0,.2,1); width: 0; }
+  .bar-pronunciation { background: var(--sage); }
+  .bar-fluency { background: var(--gold); }
+  .bar-overall { background: var(--rust); }
+  .feedback-comments {
+    background: rgba(26,26,46,0.04);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(26,26,46,0.7);
+    font-style: italic;
+  }
+  .save-session-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .save-session-btn:hover { background: var(--sage); }
+  .save-session-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── MY SESSIONS ── */
+  .sessions-list { display: flex; flex-direction: column; gap: 12px; }
+  .session-item {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 1px 8px var(--shadow);
+    display: flex; align-items: center; gap: 20px;
+  }
+  .session-info { flex: 1; }
+  .session-material-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .session-meta { font-size: 12px; color: rgba(26,26,46,0.4); margin-top: 3px; display: flex; gap: 12px; }
+  .session-scores { display: flex; gap: 12px; align-items: center; }
+  .session-score-pill {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+  .session-score-pill.p { background: rgba(74,124,89,0.1); color: var(--sage); }
+  .session-score-pill.f { background: rgba(212,160,23,0.12); color: #b8890e; }
+  .session-score-pill.o { background: rgba(192,57,43,0.1); color: var(--rust); }
+  .session-score-pill strong { font-size: 18px; font-family: 'Fraunces', serif; }
+
+  /* ── BOOKMARKS TAB ── */
+  .empty-state { text-align: center; padding: 60px 20px; color: rgba(26,26,46,0.35); }
+  .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state-text { font-size: 14px; }
+
+  /* ── GAMIFICATION ── */
+  .gamification-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .game-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .game-card-title { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 16px; }
+  .points-display { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 700; color: var(--gold); line-height: 1; }
+  .points-label { font-size: 13px; color: rgba(26,26,46,0.45); margin-top: 6px; }
+  .badges-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .badge-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; padding: 12px 16px;
+    background: var(--cream);
+    border-radius: 12px;
+    font-size: 11px;
+    color: rgba(26,26,46,0.6);
+    text-align: center;
+  }
+  .badge-icon { font-size: 28px; }
+  .badge-locked { opacity: 0.3; filter: grayscale(1); }
+
+  /* ── NOTIFICATIONS ── */
+  .notif-list { display: flex; flex-direction: column; gap: 10px; }
+  .notif-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 1px 6px var(--shadow);
+    display: flex; gap: 14px; align-items: flex-start;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .notif-item:hover { transform: translateX(3px); }
+  .notif-item.unread { border-left: 3px solid var(--rust); }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rust); flex-shrink: 0; margin-top: 6px; }
+  .notif-dot.read { background: transparent; border: 1px solid rgba(26,26,46,0.2); }
+  .notif-content { flex: 1; }
+  .notif-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .notif-text { font-size: 12px; color: rgba(26,26,46,0.5); line-height: 1.5; }
+  .notif-date { font-size: 11px; color: rgba(26,26,46,0.35); margin-top: 4px; }
+
+  /* ── PROFILE TAB ── */
+  .profile-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid rgba(26,26,46,0.07);
+    box-shadow: 0 2px 12px var(--shadow);
+    max-width: 600px;
+  }
+  .profile-avatar-large {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--rust);
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    font-family: 'Fraunces', serif;
+  }
+  .profile-name { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; margin-bottom: 4px; }
+  .profile-role-line { font-size: 13px; color: rgba(26,26,46,0.5); margin-bottom: 24px; }
+  .profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .profile-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(26,26,46,0.4); margin-bottom: 6px; display: block; }
+  .profile-field .field-value { font-size: 14px; font-weight: 500; }
+  .profile-edit-btn {
+    margin-top: 24px;
+    padding: 11px 24px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .profile-edit-btn:hover { background: var(--rust); }
+  .progress-level-bar {
+    background: rgba(26,26,46,0.07);
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-level-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--sage), var(--gold));
+    transition: width 1s ease;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(26,26,46,0.12);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: rgba(26,26,46,0.6);
+  }
+  .filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .filter-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    z-index: 9999;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity:1; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,26,46,0.5);
+    z-index: 500;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--paper);
+    border-radius: 20px;
+    padding: 36px;
+    width: 100%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(26,26,46,0.3);
+  }
+  .modal-title { font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: rgba(26,26,46,0.5); margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-secondary {
+    flex: 1; padding: 12px;
+    border: 1.5px solid rgba(26,26,46,0.15);
+    background: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(26,26,46,0.05); }
+
+  @media(max-width:768px){
+    #screen-auth { flex-direction: column; }
+    .auth-panel-left { width:100%; padding:40px 24px; min-height:200px; }
+    .reading-body { flex-direction: column; }
+    .reading-controls-pane { width:100%; border-left:none; border-top:1px solid rgba(26,26,46,0.08); }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .app-content { padding: 24px 16px; }
+    .app-nav { padding: 0 16px; }
+    .reading-text-pane { padding: 24px 20px; }
+    .gamification-panel { grid-template-columns: 1fr; }
+    .profile-fields { grid-template-columns: 1fr; }
+    .nav-role-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ AUTH SCREEN ═══════════ -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-panel-left">
+    <div class="brand-logo">Pupil<span>Reads</span></div>
+    <div class="brand-tagline">AI-Powered Reading Platform</div>
+    <div class="brand-feature">
+      <div class="brand-feature-icon">📖</div>
+      <div class="brand-feature-text"><strong>Curated Reading Materials</strong>Stories graded by difficulty for every learner</div>
+    </div>
+    <div class="brand-feature">
+      <div class="brand-feature-icon">🎙️</div>
+      <div class="brand-feature-text"><strong>Real-Time Feedback</strong>AI scores pronunciation and fluency instantly</div>
+    </div>
+    <div class="brand-feature">
+      <div class="brand-feature-icon">📊</div>
+      <div class="brand-feature-text"><strong>Progress Tracking</strong>Watch improvement across every session</div>
+    </div>
+    <div class="brand-feature">
+      <div class="brand-feature-icon">🏅</div>
+      <div class="brand-feature-text"><strong>Gamification</strong>Earn points and badges as you improve</div>
+    </div>
+  </div>
+  <div class="auth-panel-right">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login',this)">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register',this)">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="form-login">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-subtitle">Sign in to continue your reading journey</div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="login-email" type="email" class="form-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()">
+          <div class="field-error" id="login-email-err">Please enter a valid email.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="login-password" type="password" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+          <div class="field-error" id="login-pass-err">Password is required.</div>
+        </div>
+        <div id="login-error" class="error-msg">Invalid email or password. Please try again.</div>
+        <button class="btn-primary" onclick="doLogin()">Sign In</button>
+        <p style="font-size:12px;color:rgba(26,26,46,0.4);text-align:center;margin-top:14px;">Demo: <strong>pupil@demo.com</strong> / <strong>demo123</strong></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="form-register" style="display:none;">
+        <div class="auth-title">Create account</div>
+        <div class="auth-subtitle">Join PupilReads and start reading today</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input id="reg-fname" type="text" class="form-input" placeholder="Juan">
+            <div class="field-error" id="reg-fname-err">Required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input id="reg-lname" type="text" class="form-input" placeholder="Dela Cruz">
+            <div class="field-error" id="reg-lname-err">Required.</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="reg-email" type="email" class="form-input" placeholder="you@example.com">
+          <div class="field-error" id="reg-email-err">Enter a valid email address.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="reg-password" type="password" class="form-input" placeholder="At least 6 characters">
+          <div class="field-error" id="reg-pass-err">Password must be at least 6 characters.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Grade Level</label>
+            <select id="reg-grade" class="form-select">
+              <option value="">Select grade</option>
+              <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+              <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+              <option>N/A</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input id="reg-age" type="number" class="form-input" placeholder="e.g. 10" min="5" max="99">
+            <div class="field-error" id="reg-age-err">Enter a valid age (5–99).</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="reg-role" class="form-select">
+            <option value="Pupil">Pupil</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Parent">Parent</option>
+          </select>
+        </div>
+        <div id="reg-error" class="error-msg">Please fill in all required fields.</div>
+        <button class="btn-primary" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APP SCREEN ═══════════ -->
+<div id="screen-app" class="screen">
+  <nav class="app-nav">
+    <div class="nav-brand">Pupil<span>Reads</span></div>
+    <div class="nav-links">
+      <button class="nav-link active" data-tab="dashboard" onclick="showTab('dashboard',this)">Dashboard</button>
+      <button class="nav-link" data-tab="reading" onclick="showTab('reading',this)">Reading</button>
+      <button class="nav-link" data-tab="sessions" onclick="showTab('sessions',this)">My Sessions</button>
+      <button class="nav-link" data-tab="bookmarks" onclick="showTab('bookmarks',this)">Bookmarks</button>
+      <button class="nav-link" data-tab="gamification" onclick="showTab('gamification',this)">Rewards</button>
+      <button class="nav-link" data-tab="notifications" onclick="showTab('notifications',this)" id="nav-notif">
+        Notifications
+        <span class="nav-badge" id="notif-badge" style="display:none"></span>
+      </button>
+      <button class="nav-link" data-tab="profile" onclick="showTab('profile',this)">Profile</button>
+    </div>
+    <div class="nav-user">
+      <span class="nav-role-badge" id="nav-role-badge">Pupil</span>
+      <div class="nav-avatar" id="nav-avatar">P</div>
+      <span class="nav-username" id="nav-username">Pupil</span>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="app-content">
+
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="page-heading">Dashboard</div>
+      <div class="page-sub" id="dash-greeting">Good day! Ready to read?</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Sessions Completed</div>
+          <div class="stat-value" id="stat-sessions">0</div>
+          <div class="stat-desc">Total reading sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Pronunciation</div>
+          <div class="stat-value" id="stat-pron">—</div>
+          <div class="stat-desc">Out of 100</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Fluency</div>
+          <div class="stat-value" id="stat-flu">—</div>
+          <div class="stat-desc">Out of 100</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Points</div>
+          <div class="stat-value" id="stat-points" style="color:var(--gold)">0</div>
+          <div class="stat-desc">Earned from reading</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Continue Reading</div>
+      </div>
+      <div class="materials-grid" id="dash-materials"></div>
+    </div>
+
+    <!-- READING TAB -->
+    <div id="tab-reading" class="tab-panel">
+      <div class="page-heading">Reading Materials</div>
+      <div class="page-sub">Choose a story to read aloud</div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterMaterials('All',this)">All</button>
+        <button class="filter-btn" onclick="filterMaterials('Beginner',this)">Beginner</button>
+        <button class="filter-btn" onclick="filterMaterials('Intermediate',this)">Intermediate</button>
+        <button class="filter-btn" onclick="filterMaterials('Advanced',this)">Advanced</button>
+      </div>
+      <div class="materials-grid" id="all-materials"></div>
+    </div>
+
+    <!-- SESSIONS TAB -->
+    <div id="tab-sessions" class="tab-panel">
+      <div class="page-heading">My Sessions</div>
+      <div class="page-sub">Review your reading history and feedback</div>
+      <div class="sessions-list" id="sessions-list"></div>
+    </div>
+
+    <!-- BOOKMARKS TAB -->
+    <div id="tab-bookmarks" class="tab-panel">
+      <div class="page-heading">Bookmarks</div>
+      <div class="page-sub">Your saved reading materials</div>
+      <div class="materials-grid" id="bookmarks-grid"></div>
+    </div>
+
+    <!-- GAMIFICATION TAB -->
+    <div id="tab-gamification" class="tab-panel">
+      <div class="page-heading">Rewards</div>
+      <div class="page-sub">Earn points and badges by reading</div>
+      <div class="gamification-panel">
+        <div class="game-card">
+          <div class="game-card-title">⭐ Your Points</div>
+          <div class="points-display" id="game-points">0</div>
+          <div class="points-label">Total points earned</div>
+          <div style="margin-top:18px;">
+            <div style="font-size:12px;color:rgba(26,26,46,0.45);margin-bottom:6px;">Next milestone: <span id="next-milestone">100 pts</span></div>
+            <div class="progress-level-bar"><div class="progress-level-fill" id="points-progress-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="game-card">
+          <div class="game-card-title">🏅 Badges</div>
+          <div class="badges-grid" id="badges-grid"></div>
+        </div>
+      </div>
+      <div class="section-title">How to Earn Points</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:12px;" id="earn-guide">
+        <div class="stat-card"><div class="stat-label">Complete a Session</div><div class="stat-value" style="font-size:26px;color:var(--sage)">+10</div><div class="stat-desc">Any reading session saved</div></div>
+        <div class="stat-card"><div class="stat-label">Score 80+ Pronunciation</div><div class="stat-value" style="font-size:26px;color:var(--gold)">+5</div><div class="stat-desc">Per qualifying session</div></div>
+        <div class="stat-card"><div class="stat-label">Score 80+ Fluency</div><div class="stat-value" style="font-size:26px;color:var(--gold)">+5</div><div class="stat-desc">Per qualifying session</div></div>
+        <div class="stat-card"><div class="stat-label">Read Advanced Text</div><div class="stat-value" style="font-size:26px;color:var(--rust)">+10</div><div class="stat-desc">Bonus for advanced difficulty</div></div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS TAB -->
+    <div id="tab-notifications" class="tab-panel">
+      <div class="page-heading">Notifications</div>
+      <div class="page-sub">Stay updated on your reading progress</div>
+      <div class="notif-list" id="notif-list"></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div id="tab-profile" class="tab-panel">
+      <div class="page-heading">My Profile</div>
+      <div class="page-sub">Your personal information and progress</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:900px;">
+        <div class="profile-card">
+          <div class="profile-avatar-large" id="profile-avatar-large">P</div>
+          <div class="profile-name" id="profile-name">Demo Pupil</div>
+          <div class="profile-role-line" id="profile-role-line">Pupil • Grade 4 • Age 10</div>
+          <div class="profile-fields">
+            <div class="profile-field"><label>Email</label><div class="field-value" id="profile-email">—</div></div>
+            <div class="profile-field"><label>Role</label><div class="field-value" id="profile-role">—</div></div>
+            <div class="profile-field"><label>Grade Level</label><div class="field-value" id="profile-grade">—</div></div>
+            <div class="profile-field"><label>Age</label><div class="field-value" id="profile-age">—</div></div>
+          </div>
+          <button class="profile-edit-btn" onclick="openEditProfile()">Edit Profile</button>
+        </div>
+        <div class="profile-card">
+          <div class="game-card-title" style="margin-bottom:16px;">📈 Reading Progress</div>
+          <div class="profile-field" style="margin-bottom:16px;">
+            <label>Current Level</label>
+            <div class="field-value" id="profile-level" style="font-size:18px;color:var(--sage);">—</div>
+          </div>
+          <div class="profile-field" style="margin-bottom:16px;">
+            <label>Total Score</label>
+            <div class="field-value" id="profile-total-score" style="font-size:28px;font-family:'Fraunces',serif;color:var(--rust);">0</div>
+          </div>
+          <div class="profile-field">
+            <label>Overall Progress</label>
+            <div class="progress-level-bar" style="margin-top:8px;">
+              <div class="progress-level-fill" id="profile-progress-fill" style="width:0%"></div>
+            </div>
+            <div style="font-size:11px;color:rgba(26,26,46,0.4);margin-top:5px;" id="profile-progress-lbl">0% toward next level</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ READING SESSION SCREEN ═══════════ -->
+<div id="screen-reading" class="screen">
+  <div class="reading-header">
+    <button class="btn-back" onclick="closeReading()">← Back</button>
+    <div class="reading-title-bar" id="reading-title-bar">The Little Star</div>
+    <span class="difficulty-badge" id="reading-diff-badge"></span>
+  </div>
+  <div class="reading-body">
+    <div class="reading-text-pane">
+      <h2 id="reading-h2"></h2>
+      <div class="reading-text" id="reading-text-content"></div>
+    </div>
+    <div class="reading-controls-pane">
+      <div>
+        <div class="pane-title">🎙️ Reading Session</div>
+        <div class="pane-hint">Press Start, read the story aloud, then press Stop to receive AI feedback.</div>
+      </div>
+      <div>
+        <button class="recording-btn start" id="rec-btn" onclick="toggleRecording()">▶ Start Reading</button>
+        <div class="recording-timer" id="rec-timer">0:00</div>
+      </div>
+      <button class="simulate-btn" onclick="simulateFeedback()">⚡ Simulate Reading (Demo)</button>
+      <div class="divider"></div>
+
+      <!-- FEEDBACK -->
+      <div class="feedback-section" id="feedback-section">
+        <div class="pane-title">📝 AI Feedback</div>
+        <div class="score-row">
+          <div class="score-box pronunciation">
+            <div class="score-box-label">Pronunciation</div>
+            <div class="score-box-value" id="fb-pron-val">0</div>
+          </div>
+          <div class="score-box fluency">
+            <div class="score-box-label">Fluency</div>
+            <div class="score-box-value" id="fb-flu-val">0</div>
+          </div>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-label"><span>Pronunciation</span><span id="bar-p-lbl">0%</span></div>
+          <div class="score-bar-track"><div class="score-bar-fill bar-pronunciation" id="bar-p"></div></div>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-label"><span>Fluency</span><span id="bar-f-lbl">0%</span></div>
+          <div class="score-bar-track"><div class="score-bar-fill bar-fluency" id="bar-f"></div></div>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-label"><span>Overall</span><span id="bar-o-lbl">0%</span></div>
+          <div class="score-bar-track"><div class="score-bar-fill bar-overall" id="bar-o"></div></div>
+        </div>
+        <div class="feedback-comments" id="fb-comments">Great job!</div>
+        <button class="save-session-btn" id="save-btn" onclick="saveSession()">💾 Save Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ EDIT PROFILE MODAL ═══════════ -->
+<div class="modal-overlay" id="modal-edit-profile">
+  <div class="modal-box">
+    <div class="modal-title">Edit Profile</div>
+    <div class="modal-sub">Update your personal information</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input id="edit-fname" type="text" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input id="edit-lname" type="text" class="form-input">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Grade Level</label>
+        <select id="edit-grade" class="form-select">
+          <option value="">Select grade</option>
+          <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+          <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+          <option>N/A</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input id="edit-age" type="number" class="form-input" min="5" max="99">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-edit-profile')">Cancel</button>
+      <button class="btn-primary" style="flex:1" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  DATA STORE (mirrors ERD tables)
+// ═══════════════════════════════════════
+const DB = {
+  // USER table
+  users: [
+    { id:'u1', fname:'Demo', lname:'Pupil', email:'pupil@demo.com', password:'demo123', role:'Pupil' }
+  ],
+  // USERPROFILE table
+  userProfiles: [
+    { profileId:'p1', userId:'u1', gradeLevel:'Grade 4', age:10 }
+  ],
+  // READINGSESSION table
+  sessions: [],
+  // FEEDBACK table (linked 1:1 with session via sessionId)
+  feedbacks: [],
+  // PROGRESSTRACKING table
+  progressRecords: [
+    { progressId:'prog1', userId:'u1', totalScore:0, level:'Beginner Reader' }
+  ],
+  // BOOKMARKEDCONTENT table
+  bookmarks: [],
+  // GAMIFICATION table
+  gamification: [
+    { gameId:'g1', userId:'u1', points:0, badges:[] }
+  ],
+  // NOTIFICATION table
+  notifications: [
+    { notifId:'n1', userId:'u1', title:'Welcome to PupilReads! 🎉', content:'Start your first reading session to earn your first badge and points.', status:'Unread', date:'Today' }
+  ],
+  // REPORT table (referenced in data dictionary)
+  reports: [],
+
+  nextId: 100
+};
+
+const MATERIALS = [
+  { id:'m1', title:'The Little Star', difficulty:'Beginner', content:`Once upon a time, a small star lived high up in the night sky. Every night, the little star would shine as brightly as it could, hoping that children on Earth would see its light and smile.\n\nOne evening, a young girl named Lucia looked out her window. She saw the little star twinkling just for her. She made a wish — that all the children in the world would always have someone to look after them.\n\nThe little star heard her wish. It glowed even brighter that night, and from that moment on, Lucia never felt alone whenever she looked up at the sky.` },
+  { id:'m2', title:'The Helpful Ant', difficulty:'Beginner', content:`Deep inside a mango grove, a colony of ants worked hard every single day. Among them was a tiny red ant named Roni, who was always the first one to wake up and the last one to sleep.\n\nOne rainy afternoon, a large leaf fell and blocked the entrance to their home. The other ants panicked, but Roni stayed calm. "Together," said Roni, "we can move it."\n\nThey pushed and pulled until the leaf moved aside. The queen ant thanked Roni and reminded everyone that no task is too big when you have friends to help.` },
+  { id:'m3', title:'The River and the Mountain', difficulty:'Intermediate', content:`Long ago, a river and a mountain stood side by side. The mountain was tall and proud, never moving, while the river was always flowing, always changing.\n\n"You are weak," said the mountain. "You cannot stand still for even a moment." The river laughed gently and replied, "I do not need to stand still. My strength is in my motion."\n\nYears passed. The mountain watched as the river carved through rock and stone, creating valleys and nurturing forests along its banks. Slowly, the mountain understood that there is more than one kind of strength in this world.\n\nTrue power, it realized, does not always look the same.` },
+  { id:'m4', title:'The Science of Light', difficulty:'Advanced', content:`Light is one of the most fascinating phenomena in the natural world. It travels at approximately 299,792 kilometers per second in a vacuum — a speed so immense that it takes only about eight minutes for sunlight to reach the Earth from the Sun.\n\nWhen light passes through a prism, it separates into its component wavelengths, producing the colors of the visible spectrum: red, orange, yellow, green, blue, indigo, and violet. This is known as dispersion.\n\nScientists describe light as having a dual nature — it behaves both as a wave and as a particle called a photon. This wave-particle duality was one of the most surprising discoveries of the twentieth century and remains a cornerstone of modern quantum physics.\n\nUnderstanding light has led to revolutionary technologies, from fiber optic communications to laser surgery, fundamentally transforming how we live.` }
+];
+
+const ALL_BADGES = [
+  { id:'b1', icon:'⭐', label:'First Read', desc:'Complete your first session', threshold:1 },
+  { id:'b2', icon:'📚', label:'Bookworm', desc:'Complete 5 sessions', threshold:5 },
+  { id:'b3', icon:'🏆', label:'Champion', desc:'Complete 10 sessions', threshold:10 },
+  { id:'b4', icon:'🎯', label:'Sharp Eye', desc:'Score 85+ pronunciation', threshold:null, type:'pron' },
+  { id:'b5', icon:'🌊', label:'Smooth Flow', desc:'Score 85+ fluency', threshold:null, type:'flu' },
+  { id:'b6', icon:'🚀', label:'Advanced Reader', desc:'Read an Advanced text', threshold:null, type:'advanced' },
+];
+
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let currentUser = null;
+let currentMaterial = null;
+let isRecording = false;
+let recInterval = null;
+let recSeconds = 0;
+let pendingFeedback = null;
+let sessionSaved = false;
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+function genId(prefix) { return prefix + (++DB.nextId); }
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function getProfile(userId) { return DB.userProfiles.find(p => p.userId === userId) || {}; }
+function getGameRecord(userId) { return DB.gamification.find(g => g.userId === userId); }
+function getProgress(userId) { return DB.progressRecords.find(p => p.userId === userId); }
+function getUserSessions(userId) { return DB.sessions.filter(s => s.userId === userId); }
+function getUserBookmarks(userId) { return DB.bookmarks.filter(b => b.userId === userId); }
+function getUserNotifications(userId) { return DB.notifications.filter(n => n.userId === userId); }
+function unreadCount(userId) { return getUserNotifications(userId).filter(n => n.status === 'Unread').length; }
+
+function clearFieldError(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('show'); }
+}
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { if(msg) el.textContent = msg; el.classList.add('show'); }
+}
+
+// ═══════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════
+function switchAuthTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  let valid = true;
+  if (!isValidEmail(email)) { showFieldError('login-email-err'); valid = false; } else clearFieldError('login-email-err');
+  if (!pass) { showFieldError('login-pass-err'); valid = false; } else clearFieldError('login-pass-err');
+  if (!valid) return;
+  const user = DB.users.find(u => u.email === email && u.password === pass);
+  if (!user) { document.getElementById('login-error').classList.add('show'); return; }
+  document.getElementById('login-error').classList.remove('show');
+  loginSuccess(user);
+}
+
+function doRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  const grade = document.getElementById('reg-grade').value;
+  const age = parseInt(document.getElementById('reg-age').value);
+  const role = document.getElementById('reg-role').value;
+  let valid = true;
+
+  if (!fname) { showFieldError('reg-fname-err'); valid = false; } else clearFieldError('reg-fname-err');
+  if (!lname) { showFieldError('reg-lname-err'); valid = false; } else clearFieldError('reg-lname-err');
+  if (!isValidEmail(email)) { showFieldError('reg-email-err'); valid = false; } else clearFieldError('reg-email-err');
+  if (pass.length < 6) { showFieldError('reg-pass-err'); valid = false; } else clearFieldError('reg-pass-err');
+  if (age && (age < 5 || age > 99)) { showFieldError('reg-age-err'); valid = false; } else clearFieldError('reg-age-err');
+  if (!valid) { document.getElementById('reg-error').classList.add('show'); return; }
+
+  if (DB.users.find(u => u.email === email)) {
+    document.getElementById('reg-error').textContent = 'Email already registered.';
+    document.getElementById('reg-error').classList.add('show'); return;
+  }
+  document.getElementById('reg-error').classList.remove('show');
+
+  const uid = genId('u');
+  const newUser = { id: uid, fname, lname, email, password: pass, role };
+  DB.users.push(newUser);
+  DB.userProfiles.push({ profileId: genId('p'), userId: uid, gradeLevel: grade || 'N/A', age: age || 0 });
+  DB.gamification.push({ gameId: genId('g'), userId: uid, points: 0, badges: [] });
+  DB.progressRecords.push({ progressId: genId('prog'), userId: uid, totalScore: 0, level: 'Beginner Reader' });
+  DB.notifications.push({ notifId: genId('n'), userId: uid, title: 'Welcome to PupilReads! 🎉', content: 'Start your first reading session to earn points and badges.', status: 'Unread', date: 'Today' });
+  loginSuccess(newUser);
+  showToast('Account created! Welcome, ' + fname + '! 🎉');
+}
+
+function loginSuccess(user) {
+  currentUser = user;
+  const profile = getProfile(user.id);
+  // Populate nav
+  document.getElementById('nav-avatar').textContent = user.fname[0].toUpperCase();
+  document.getElementById('nav-username').textContent = user.fname + ' ' + user.lname;
+  document.getElementById('nav-role-badge').textContent = user.role;
+  document.getElementById('dash-greeting').textContent = 'Good day, ' + user.fname + '! Ready to read?';
+  // Reset reading state
+  pendingFeedback = null;
+  sessionSaved = false;
+  // Show app
+  showScreen('app');
+  showTab('dashboard', document.querySelector('.nav-link[data-tab="dashboard"]'));
+  renderAll();
+}
+
+function doLogout() {
+  currentUser = null;
+  pendingFeedback = null;
+  sessionSaved = false;
+  // Clear login form
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  showScreen('auth');
+  showToast('Signed out successfully.');
+}
+
+// ═══════════════════════════════════════
+//  SCREENS & TABS
+// ═══════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Refresh tab-specific data
+  if (name === 'sessions') renderSessions();
+  if (name === 'bookmarks') renderBookmarks();
+  if (name === 'gamification') renderGamification();
+  if (name === 'notifications') renderNotifications();
+  if (name === 'profile') renderProfile();
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ═══════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════
+function renderAll() {
+  renderDashboard();
+  renderAllMaterials();
+  updateNotifBadge();
+}
+
+// ═══════════════════════════════════════
+//  MATERIALS
+// ═══════════════════════════════════════
+function diffClass(d) {
+  return d === 'Beginner' ? 'diff-beginner' : d === 'Intermediate' ? 'diff-intermediate' : 'diff-advanced';
+}
+
+function isBookmarked(materialId) {
+  if (!currentUser) return false;
+  return DB.bookmarks.some(b => b.userId === currentUser.id && b.materialId === materialId);
+}
+
+function materialCardHTML(m, showBookmark=true) {
+  const preview = m.content.substring(0, 140) + '…';
+  const bm = isBookmarked(m.id);
+  return `<div class="material-card">
+    <div class="difficulty-badge ${diffClass(m.difficulty)}">${m.difficulty}</div>
+    <div class="material-title">${m.title}</div>
+    <div class="material-preview">${preview}</div>
+    <div class="material-card-footer">
+      <button class="btn-read" onclick="openReading('${m.id}')">Read Aloud →</button>
+      ${showBookmark ? `<button class="btn-bookmark ${bm?'bookmarked':''}" title="${bm?'Remove bookmark':'Bookmark'}" onclick="toggleBookmark('${m.id}',this)">${bm?'🔖':'🏷️'}</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderDashboard() {
+  if (!currentUser) return;
+  const mySessions = getUserSessions(currentUser.id);
+  document.getElementById('stat-sessions').textContent = mySessions.length;
+  if (mySessions.length > 0) {
+    const avgP = Math.round(mySessions.reduce((a,s)=>a+s.pronunciation,0)/mySessions.length);
+    const avgF = Math.round(mySessions.reduce((a,s)=>a+s.fluency,0)/mySessions.length);
+    document.getElementById('stat-pron').textContent = avgP;
+    document.getElementById('stat-flu').textContent = avgF;
+  } else {
+    document.getElementById('stat-pron').textContent = '—';
+    document.getElementById('stat-flu').textContent = '—';
+  }
+  const gr = getGameRecord(currentUser.id);
+  document.getElementById('stat-points').textContent = gr ? gr.points : 0;
+  document.getElementById('dash-materials').innerHTML = MATERIALS.slice(0,3).map(m => materialCardHTML(m)).join('');
+}
+
+function renderAllMaterials() {
+  document.getElementById('all-materials').innerHTML = MATERIALS.map(m => materialCardHTML(m)).join('');
+}
+
+function filterMaterials(level, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = level === 'All' ? MATERIALS : MATERIALS.filter(m => m.difficulty === level);
+  document.getElementById('all-materials').innerHTML =
+    filtered.length ? filtered.map(m => materialCardHTML(m)).join('') :
+    `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No materials found for this level.</div></div>`;
+}
+
+// ═══════════════════════════════════════
+//  BOOKMARKS
+// ═══════════════════════════════════════
+function toggleBookmark(materialId, btn) {
+  if (!currentUser) return;
+  const idx = DB.bookmarks.findIndex(b => b.userId === currentUser.id && b.materialId === materialId);
+  if (idx === -1) {
+    DB.bookmarks.push({ bookmarkId: genId('bm'), userId: currentUser.id, materialId });
+    btn.textContent = '🔖'; btn.classList.add('bookmarked');
+    showToast('Bookmarked! Find it in the Bookmarks tab.');
+  } else {
+    DB.bookmarks.splice(idx,1);
+    btn.textContent = '🏷️'; btn.classList.remove('bookmarked');
+    showToast('Bookmark removed.');
+  }
+  // Refresh dashboard bookmark icons too
+  renderDashboard();
+}
+
+function renderBookmarks() {
+  if (!currentUser) return;
+  const bms = getUserBookmarks(currentUser.id);
+  const el = document.getElementById('bookmarks-grid');
+  if (bms.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🔖</div><div class="empty-state-text">No bookmarks yet. Tap 🏷️ on any story to save it here.</div></div>`;
+    return;
+  }
+  const bmMaterials = bms.map(b => MATERIALS.find(m => m.id === b.materialId)).filter(Boolean);
+  el.innerHTML = bmMaterials.map(m => materialCardHTML(m)).join('');
+}
+
+// ═══════════════════════════════════════
+//  READING SESSION
+// ═══════════════════════════════════════
+function openReading(materialId) {
+  currentMaterial = MATERIALS.find(m => m.id === materialId);
+  pendingFeedback = null;
+  sessionSaved = false;
+  document.getElementById('reading-title-bar').textContent = currentMaterial.title;
+  document.getElementById('reading-h2').textContent = currentMaterial.title;
+  const badge = document.getElementById('reading-diff-badge');
+  badge.textContent = currentMaterial.difficulty;
+  badge.className = 'difficulty-badge ' + diffClass(currentMaterial.difficulty);
+  document.getElementById('reading-text-content').innerHTML =
+    currentMaterial.content.split('\n\n').map(p => `<p>${p}</p>`).join('');
+  // Reset controls
+  isRecording = false;
+  recSeconds = 0;
+  clearInterval(recInterval);
+  document.getElementById('rec-btn').className = 'recording-btn start';
+  document.getElementById('rec-btn').textContent = '▶ Start Reading';
+  document.getElementById('rec-timer').style.display = 'none';
+  document.getElementById('feedback-section').classList.remove('visible');
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-btn').textContent = '💾 Save Session';
+  // Reset bars
+  ['bar-p','bar-f','bar-o'].forEach(id => document.getElementById(id).style.width = '0');
+  showScreen('reading');
+}
+
+function closeReading() {
+  if (isRecording) stopRecording();
+  showScreen('app');
+  // Re-activate Reading tab nav
+  const readingNavBtn = document.querySelector('.nav-link[data-tab="reading"]');
+  showTab('reading', readingNavBtn);
+}
+
+function toggleRecording() {
+  if (!isRecording) startRecording(); else stopRecording();
+}
+
+function startRecording() {
+  // Clear any previous feedback when starting a new recording
+  document.getElementById('feedback-section').classList.remove('visible');
+  pendingFeedback = null;
+  sessionSaved = false;
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-btn').textContent = '💾 Save Session';
+
+  isRecording = true;
+  recSeconds = 0;
+  document.getElementById('rec-btn').className = 'recording-btn stop';
+  document.getElementById('rec-btn').textContent = '■ Stop Reading';
+  const timerEl = document.getElementById('rec-timer');
+  timerEl.style.display = 'block';
+  timerEl.textContent = '0:00';
+  recInterval = setInterval(() => {
+    recSeconds++;
+    const m = Math.floor(recSeconds/60), s = recSeconds%60;
+    timerEl.textContent = m + ':' + String(s).padStart(2,'0');
+  }, 1000);
+  showToast('Recording started… read aloud!');
+}
+
+function stopRecording() {
+  isRecording = false;
+  clearInterval(recInterval);
+  document.getElementById('rec-btn').className = 'recording-btn start';
+  document.getElementById('rec-btn').textContent = '▶ Start Reading';
+  document.getElementById('rec-timer').style.display = 'none';
+  showToast('Processing your reading…');
+  setTimeout(() => generateFeedback(recSeconds), 800);
+}
+
+function simulateFeedback() {
+  if (isRecording) stopRecording();
+  else generateFeedback(60);
+}
+
+function generateFeedback(seconds) {
+  if (!currentMaterial) return;
+  const diff = currentMaterial.difficulty;
+  const pBase = diff === 'Beginner' ? 78 : diff === 'Intermediate' ? 72 : 66;
+  const fBase = diff === 'Beginner' ? 80 : diff === 'Intermediate' ? 73 : 65;
+  const pron = Math.min(100, Math.max(50, pBase + Math.floor(Math.random()*18) - 5));
+  const fluency = Math.min(100, Math.max(50, fBase + Math.floor(Math.random()*18) - 5));
+  const overall = Math.round((pron + fluency) / 2);
+
+  let comments;
+  if (pron >= 85 && fluency >= 85) {
+    comments = 'Excellent reading! Your pronunciation was clear and your pace was steady throughout the passage.';
+  } else if (pron >= 75 || fluency >= 75) {
+    comments = 'Good effort! Your reading shows solid understanding. Try slowing down on longer words for better clarity.';
+  } else {
+    comments = 'Keep practicing! Focus on reading each word carefully. Pause at punctuation marks to improve your flow.';
+  }
+
+  pendingFeedback = { pronunciation: pron, fluency, overall, comments, seconds };
+  sessionSaved = false;
+
+  document.getElementById('fb-pron-val').textContent = pron;
+  document.getElementById('fb-flu-val').textContent = fluency;
+  document.getElementById('fb-comments').textContent = comments;
+  document.getElementById('feedback-section').classList.add('visible');
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-btn').textContent = '💾 Save Session';
+
+  setTimeout(() => {
+    document.getElementById('bar-p').style.width = pron + '%';
+    document.getElementById('bar-p-lbl').textContent = pron + '%';
+    document.getElementById('bar-f').style.width = fluency + '%';
+    document.getElementById('bar-f-lbl').textContent = fluency + '%';
+    document.getElementById('bar-o').style.width = overall + '%';
+    document.getElementById('bar-o-lbl').textContent = overall + '%';
+  }, 100);
+  showToast('Feedback ready!');
+}
+
+function saveSession() {
+  if (!pendingFeedback) { showToast('Complete a reading session first.'); return; }
+  if (sessionSaved) { showToast('Session already saved!'); return; }
+
+  const today = new Date().toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+  const sessionId = genId('sess');
+  const feedbackId = genId('fb');
+
+  // READINGSESSION record
+  DB.sessions.push({
+    sessionId, userId: currentUser.id,
+    materialId: currentMaterial.id,
+    materialTitle: currentMaterial.title,
+    difficulty: currentMaterial.difficulty,
+    date: today,
+    pronunciation: pendingFeedback.pronunciation,
+    fluency: pendingFeedback.fluency,
+    overall: pendingFeedback.overall,
+  });
+
+  // FEEDBACK record (linked to session)
+  DB.feedbacks.push({
+    feedbackId, sessionId,
+    pronunciationScore: pendingFeedback.pronunciation,
+    fluencyScore: pendingFeedback.fluency,
+    comments: pendingFeedback.comments
+  });
+
+  // Update GAMIFICATION (points + badges)
+  const gr = getGameRecord(currentUser.id);
+  if (gr) {
+    let earned = 10; // base for completing session
+    if (pendingFeedback.pronunciation >= 80) earned += 5;
+    if (pendingFeedback.fluency >= 80) earned += 5;
+    if (currentMaterial.difficulty === 'Advanced') earned += 10;
+    gr.points += earned;
+    awardBadges(gr, currentUser.id);
+    showToast(`Session saved! +${earned} points earned ⭐`);
+  }
+
+  // Update PROGRESSTRACKING
+  const prog = getProgress(currentUser.id);
+  if (prog) {
+    prog.totalScore += pendingFeedback.overall;
+    const sessions = getUserSessions(currentUser.id).length;
+    prog.level = sessions >= 10 ? 'Advanced Reader' : sessions >= 5 ? 'Intermediate Reader' : 'Beginner Reader';
+  }
+
+  // Add notification
+  DB.notifications.unshift({
+    notifId: genId('n'), userId: currentUser.id,
+    title: 'Session Saved: ' + currentMaterial.title,
+    content: `Pronunciation: ${pendingFeedback.pronunciation} | Fluency: ${pendingFeedback.fluency} | Overall: ${pendingFeedback.overall}`,
+    status: 'Unread', date: today
+  });
+
+  sessionSaved = true;
+  document.getElementById('save-btn').disabled = true;
+  document.getElementById('save-btn').textContent = '✓ Session Saved';
+  updateNotifBadge();
+  renderDashboard();
+}
+
+function awardBadges(gr, userId) {
+  const sessions = getUserSessions(userId);
+  const earned = gr.badges;
+  const add = (id) => { if (!earned.includes(id)) { earned.push(id); return true; } return false; };
+
+  if (sessions.length >= 1 && add('b1')) pushBadgeNotif(userId, 'First Read');
+  if (sessions.length >= 5 && add('b2')) pushBadgeNotif(userId, 'Bookworm');
+  if (sessions.length >= 10 && add('b3')) pushBadgeNotif(userId, 'Champion');
+  if (sessions.some(s => s.pronunciation >= 85) && add('b4')) pushBadgeNotif(userId, 'Sharp Eye');
+  if (sessions.some(s => s.fluency >= 85) && add('b5')) pushBadgeNotif(userId, 'Smooth Flow');
+  if (sessions.some(s => s.difficulty === 'Advanced') && add('b6')) pushBadgeNotif(userId, 'Advanced Reader');
+}
+
+function pushBadgeNotif(userId, badgeName) {
+  const today = new Date().toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+  DB.notifications.unshift({
+    notifId: genId('n'), userId,
+    title: '🏅 Badge Earned: ' + badgeName,
+    content: 'Congratulations! You earned the ' + badgeName + ' badge. Keep reading!',
+    status: 'Unread', date: today
+  });
+}
+
+// ═══════════════════════════════════════
+//  SESSIONS TAB
+// ═══════════════════════════════════════
+function renderSessions() {
+  if (!currentUser) return;
+  const mySessions = getUserSessions(currentUser.id).slice().reverse();
+  const el = document.getElementById('sessions-list');
+  if (mySessions.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📖</div><div class="empty-state-text">No sessions yet. Start reading to see your progress!</div></div>`;
+    return;
+  }
+  el.innerHTML = mySessions.map(s => `
+    <div class="session-item">
+      <div class="session-info">
+        <div class="session-material-name">${s.materialTitle}</div>
+        <div class="session-meta">
+          <span>${s.date}</span>
+          <span class="difficulty-badge ${diffClass(s.difficulty)}" style="margin-bottom:0;">${s.difficulty}</span>
+        </div>
+      </div>
+      <div class="session-scores">
+        <div class="session-score-pill p"><span>Pronunciation</span><strong>${s.pronunciation}</strong></div>
+        <div class="session-score-pill f"><span>Fluency</span><strong>${s.fluency}</strong></div>
+        <div class="session-score-pill o"><span>Overall</span><strong>${s.overall}</strong></div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════
+//  GAMIFICATION TAB
+// ═══════════════════════════════════════
+function renderGamification() {
+  if (!currentUser) return;
+  const gr = getGameRecord(currentUser.id);
+  const pts = gr ? gr.points : 0;
+  document.getElementById('game-points').textContent = pts;
+  // Milestone
+  const milestones = [100,250,500,1000];
+  const next = milestones.find(m => m > pts) || 1000;
+  const prev = milestones[milestones.indexOf(next)-1] || 0;
+  document.getElementById('next-milestone').textContent = next + ' pts';
+  const pct = Math.min(100, Math.round(((pts - prev) / (next - prev)) * 100));
+  document.getElementById('points-progress-fill').style.width = pct + '%';
+  // Badges
+  const earned = gr ? gr.badges : [];
+  document.getElementById('badges-grid').innerHTML = ALL_BADGES.map(b => `
+    <div class="badge-item ${earned.includes(b.id)?'':'badge-locked'}" title="${b.desc}">
+      <div class="badge-icon">${b.icon}</div>
+      <div>${b.label}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════
+//  NOTIFICATIONS TAB
+// ═══════════════════════════════════════
+function updateNotifBadge() {
+  if (!currentUser) return;
+  const cnt = unreadCount(currentUser.id);
+  const badge = document.getElementById('notif-badge');
+  if (cnt > 0) { badge.style.display='flex'; badge.textContent = cnt; }
+  else { badge.style.display='none'; }
+}
+
+function renderNotifications() {
+  if (!currentUser) return;
+  const notifs = getUserNotifications(currentUser.id);
+  const el = document.getElementById('notif-list');
+  if (notifs.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔔</div><div class="empty-state-text">No notifications yet.</div></div>`;
+    return;
+  }
+  el.innerHTML = notifs.map(n => `
+    <div class="notif-item ${n.status==='Unread'?'unread':''}" onclick="markRead('${n.notifId}',this)">
+      <div class="notif-dot ${n.status==='Read'?'read':''}"></div>
+      <div class="notif-content">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-text">${n.content}</div>
+        <div class="notif-date">${n.date}</div>
+      </div>
+    </div>`).join('');
+}
+
+function markRead(notifId, el) {
+  const n = DB.notifications.find(n => n.notifId === notifId);
+  if (n && n.status === 'Unread') {
+    n.status = 'Read';
+    el.classList.remove('unread');
+    el.querySelector('.notif-dot').classList.add('read');
+    updateNotifBadge();
+  }
+}
+
+// ═══════════════════════════════════════
+//  PROFILE TAB
+// ═══════════════════════════════════════
+function renderProfile() {
+  if (!currentUser) return;
+  const profile = getProfile(currentUser.id);
+  const prog = getProgress(currentUser.id);
+  const initial = currentUser.fname[0].toUpperCase();
+
+  document.getElementById('profile-avatar-large').textContent = initial;
+  document.getElementById('profile-name').textContent = currentUser.fname + ' ' + currentUser.lname;
+  document.getElementById('profile-role-line').textContent =
+    [currentUser.role, profile.gradeLevel, profile.age ? 'Age ' + profile.age : ''].filter(Boolean).join(' • ');
+  document.getElementById('profile-email').textContent = currentUser.email;
+  document.getElementById('profile-role').textContent = currentUser.role;
+  document.getElementById('profile-grade').textContent = profile.gradeLevel || '—';
+  document.getElementById('profile-age').textContent = profile.age || '—';
+
+  if (prog) {
+    document.getElementById('profile-level').textContent = prog.level;
+    document.getElementById('profile-total-score').textContent = prog.totalScore;
+    const sessions = getUserSessions(currentUser.id).length;
+    const nextLevelAt = sessions < 5 ? 5 : 10;
+    const pct = Math.min(100, Math.round((sessions / nextLevelAt) * 100));
+    document.getElementById('profile-progress-fill').style.width = pct + '%';
+    document.getElementById('profile-progress-lbl').textContent = pct + '% toward next level (' + sessions + '/' + nextLevelAt + ' sessions)';
+  }
+}
+
+// ═══════════════════════════════════════
+//  EDIT PROFILE MODAL
+// ═══════════════════════════════════════
+function openEditProfile() {
+  const profile = getProfile(currentUser.id);
+  document.getElementById('edit-fname').value = currentUser.fname;
+  document.getElementById('edit-lname').value = currentUser.lname;
+  document.getElementById('edit-grade').value = profile.gradeLevel || '';
+  document.getElementById('edit-age').value = profile.age || '';
+  openModal('modal-edit-profile');
+}
+
+function saveProfile() {
+  const fname = document.getElementById('edit-fname').value.trim();
+  const lname = document.getElementById('edit-lname').value.trim();
+  const grade = document.getElementById('edit-grade').value;
+  const age = parseInt(document.getElementById('edit-age').value);
+  if (!fname || !lname) { showToast('Name fields cannot be empty.'); return; }
+
+  currentUser.fname = fname;
+  currentUser.lname = lname;
+  const profile = getProfile(currentUser.id);
+  if (profile) { profile.gradeLevel = grade || 'N/A'; profile.age = age || 0; }
+
+  // Update nav
+  document.getElementById('nav-avatar').textContent = fname[0].toUpperCase();
+  document.getElementById('nav-username').textContent = fname + ' ' + lname;
+  document.getElementById('dash-greeting').textContent = 'Good day, ' + fname + '! Ready to read?';
+
+  closeModal('modal-edit-profile');
+  renderProfile();
+  showToast('Profile updated! ✓');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
+let toastTimeout = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
